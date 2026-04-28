@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>IWOSCENE 3.0 - 个人中心</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans SC', 'Alibaba PuHuiTi', -apple-system, sans-serif;
+    background: #F0F4F8;
+    width: 1920px; height: 1080px; overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Dribbble 升级：柔和背景纹理 ===== */
+  body::before {
+    content: ''; position: fixed; top: -50%; left: -50%;
+    width: 200%; height: 200%; z-index: -1;
+    background: radial-gradient(ellipse at 20% 50%, rgba(25,134,236,0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(25,134,236,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(1,184,100,0.02) 0%, transparent 50%),
+                #F0F4F8;
+  }
+
+  /* ===== 侧栏 ===== */
+  .sidebar {
+    position: fixed; left: 0; top: 0;
+    width: 260px; height: 1080px;
+    background: #FFFFFF;
+    z-index: 10;
+    box-shadow: 2px 0 20px rgba(0,0,0,0.03);
+  }
+  .sidebar-logo {
+    height: 64px; display: flex; align-items: center;
+    padding: 0 24px;
+    font-size: 18px; font-weight: 700;
+    background: linear-gradient(135deg, #1986EC 0%, #0D6BC4 100%);
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .sidebar-logo svg { margin-right: 12px; }
+  .sidebar-menu { padding: 16px 0; }
+  .menu-label {
+    padding: 8px 24px; font-size: 11px;
+    color: rgba(0,0,0,0.26); text-transform: uppercase;
+    letter-spacing: 1px; font-weight: 600;
+  }
+  .menu-item {
+    height: 44px; display: flex; align-items: center;
+    padding: 0 24px; margin: 2px 12px; cursor: pointer;
+    color: rgba(0,0,0,0.55); font-size: 14px; border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+  .menu-item:hover { background: rgba(25,134,236,0.06); color: #1986EC; }
+  .menu-item.active {
+    background: linear-gradient(135deg, #1986EC 0%, #1A7DE0 100%);
+    color: #FFFFFF; font-weight: 500;
+    box-shadow: 0 4px 12px rgba(25,134,236,0.3);
+  }
+  .menu-item svg { width: 18px; height: 18px; margin-right: 12px; flex-shrink: 0; opacity: 0.7; }
+  .menu-item.active svg { opacity: 1; }
+
+  /* ===== 顶部导航 ===== */
+  .header {
+    position: fixed; top: 0; left: 260px; right: 0;
+    height: 64px; background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px; z-index: 9;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .header-left { display: flex; align-items: center; gap: 8px; }
+  .header-breadcrumb {
+    font-size: 13px; color: rgba(0,0,0,0.38);
+  }
+  .header-breadcrumb span { color: rgba(0,0,0,0.68); font-weight: 500; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .header-icon-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: rgba(0,0,0,0.38);
+    transition: all 0.2s; background: transparent;
+  }
+  .header-icon-btn:hover { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.68); }
+  .header-avatar-wrap {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 12px 4px 4px; border-radius: 28px;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .header-avatar-wrap:hover { background: rgba(0,0,0,0.04); }
+  .header-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #1986EC, #01B864);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: 600;
+  }
+  .header-user-name { font-size: 13px; color: rgba(0,0,0,0.68); }
+
+  /* ===== 内容区 ===== */
+  .content-area {
+    position: fixed; left: 260px; top: 64px; right: 0; bottom: 0;
+    background: transparent; padding: 28px 32px;
+    overflow-y: auto;
+  }
+
+  /* ===== 页面标题区 ===== */
+  .page-header {
+    margin-bottom: 28px;
+  }
+  .page-title {
+    font-size: 24px; font-weight: 600; color: rgba(0,0,0,0.92);
+    margin-bottom: 4px;
+  }
+  .page-subtitle {
+    font-size: 13px; color: rgba(0,0,0,0.38);
+  }
+
+  /* ===== Tab 栏（Dribbble 风格胶囊 Tab） ===== */
+  .tab-bar {
+    display: flex; gap: 4px; margin-bottom: 28px;
+    background: #FFFFFF; padding: 5px; border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    width: fit-content;
+  }
+  .tab-item {
+    padding: 10px 24px; border-radius: 10px;
+    font-size: 13px; color: rgba(0,0,0,0.44); cursor: pointer;
+    transition: all 0.25s ease; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab-item:hover { color: rgba(0,0,0,0.68); }
+  .tab-item.active {
+    background: #FFFFFF;
+    color: #1986EC;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .tab-item svg { width: 16px; height: 16px; }
+
+  /* ===== Tab 内容区 ===== */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ===== Dribbble 风格卡片 ===== */
+  .card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+  }
+  .card:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 30px rgba(0,0,0,0.04);
+  }
+  .card-header {
+    padding: 24px 32px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title {
+    font-size: 16px; font-weight: 600; color: rgba(0,0,0,0.88);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title .icon-circle {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(25,134,236,0.1), rgba(25,134,236,0.05));
+    color: #1986EC;
+  }
+  .card-title .icon-circle svg { width: 18px; height: 18px; }
+  .card-desc {
+    padding: 8px 32px 0;
+    font-size: 13px; color: rgba(0,0,0,0.38);
+    line-height: 18px;
+  }
+  .card-body { padding: 24px 32px 32px; }
+
+  /* ===== 表单区域（Dribbble 风格） ===== */
+  .form-section {
+    padding-top: 24px;
+    border-top: 1px solid rgba(0,0,0,0.04);
+    margin-top: 24px;
+  }
+  .form-section-title {
+    font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.68);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .form-section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(0,0,0,0.06);
+  }
+  .form-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label {
+    font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.68);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .form-label .required { color: #D31F1F; }
+  .form-input {
+    height: 44px; padding: 0 16px;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 10px; font-size: 14px;
+    color: rgba(0,0,0,0.88); background: rgba(248,250,252,0.5);
+    transition: all 0.2s ease;
+    font-family: inherit;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #1986EC;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(25,134,236,0.08);
+  }
+  .form-input::placeholder { color: rgba(0,0,0,0.22); }
+  .form-input.readonly {
+    background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.38);
+    cursor: not-allowed;
+  }
+
+  /* ===== 头像上传区（Dribbble 风格） ===== */
+  .avatar-upload-area {
+    display: flex; align-items: center; gap: 24px;
+    margin-bottom: 8px;
+  }
+  .avatar-preview {
+    width: 80px; height: 80px; border-radius: 20px;
+    background: linear-gradient(135deg, #1986EC 0%, #01B864 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 28px; font-weight: 600;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(25,134,236,0.2);
+  }
+  .avatar-edit-btn {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #FFFFFF; border: 2px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .avatar-edit-btn svg { width: 14px; height: 14px; color: #1986EC; }
+  .avatar-info { display: flex; flex-direction: column; gap: 4px; }
+  .avatar-info p { font-size: 12px; color: rgba(0,0,0,0.38); line-height: 16px; }
+  .avatar-info .btn-text {
+    font-size: 13px; color: #1986EC; cursor: pointer;
+    font-weight: 500;
+  }
+
+  /* ===== 按钮（Dribbble 风格） ===== */
+  .btn {
+    height: 44px; padding: 0 28px; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: all 0.25s ease; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #1986EC 0%, #1472CC 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(25,134,236,0.25);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(25,134,236,0.35);
+  }
+  .btn-secondary {
+    background: rgba(0,0,0,0.03); color: rgba(0,0,0,0.68);
+    border: 1.5px solid rgba(0,0,0,0.08);
+  }
+  .btn-secondary:hover {
+    background: rgba(0,0,0,0.06);
+  }
+  .btn-danger {
+    background: rgba(211,31,31,0.06); color: #D31F1F;
+    border: 1.5px solid rgba(211,31,31,0.12);
+  }
+  .btn-danger:hover {
+    background: rgba(211,31,31,0.1);
+  }
+  .btn-sm { height: 36px; padding: 0 20px; font-size: 13px; border-radius: 8px; }
+  .form-actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+    margin-top: 32px; padding-top: 24px;
+    border-top: 1px solid rgba(0,0,0,0.04);
+  }
+
+  /* ===== 密码强度指示 ===== */
+  .password-strength {
+    display: flex; gap: 4px; margin-top: 8px; align-items: center;
+  }
+  .strength-bar {
+    width: 40px; height: 3px; border-radius: 2px;
+    background: rgba(0,0,0,0.06);
+  }
+  .strength-bar.weak { background: #D31F1F; }
+  .strength-bar.medium { background: #F59E0B; }
+  .strength-bar.strong { background: #01B864; }
+  .strength-text {
+    font-size: 11px; margin-left: 8px;
+  }
+
+  /* ===== 微信绑定卡片 ===== */
+  .wechat-bind-area {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 48px 0 40px;
+  }
+  .wechat-icon-large {
+    width: 72px; height: 72px; border-radius: 20px;
+    background: linear-gradient(135deg, #07C160 0%, #06AD56 100%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(7,193,96,0.25);
+  }
+  .wechat-icon-large svg { width: 36px; height: 36px; color: #fff; }
+  .wechat-bind-title {
+    font-size: 18px; font-weight: 600; color: rgba(0,0,0,0.88);
+    margin-bottom: 8px;
+  }
+  .wechat-bind-desc {
+    font-size: 13px; color: rgba(0,0,0,0.38);
+    margin-bottom: 28px; text-align: center; line-height: 20px;
+  }
+  .wechat-qrcode {
+    width: 200px; height: 200px;
+    border-radius: 16px; background: #F5F7FA;
+    border: 2px dashed rgba(0,0,0,0.08);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .wechat-qrcode svg { width: 80px; height: 80px; color: rgba(0,0,0,0.12); }
+  .wechat-qrcode-tip {
+    font-size: 12px; color: rgba(0,0,0,0.26);
+    margin-top: 12px;
+  }
+
+  /* ===== 微信已绑定 ===== */
+  .wechat-bound-area {
+    display: flex; align-items: center; gap: 32px;
+    padding: 12px 0;
+  }
+  .wechat-avatar-bound {
+    width: 72px; height: 72px; border-radius: 18px;
+    background: linear-gradient(135deg, #07C160 0%, #06AD56 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(7,193,96,0.25);
+    flex-shrink: 0;
+  }
+  .wechat-avatar-bound svg { width: 36px; height: 36px; color: #fff; }
+  .wechat-bound-info { flex: 1; }
+  .wechat-bound-info .name {
+    font-size: 18px; font-weight: 600; color: rgba(0,0,0,0.88);
+    margin-bottom: 4px;
+  }
+  .wechat-bound-info .account {
+    font-size: 13px; color: rgba(0,0,0,0.38);
+    margin-bottom: 4px;
+  }
+  .wechat-bound-info .bind-time {
+    font-size: 12px; color: rgba(0,0,0,0.26);
+  }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+  }
+  .status-badge.connected {
+    background: rgba(1,184,100,0.08); color: #01B864;
+  }
+  .status-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ===== 安全提示 ===== */
+  .security-tips {
+    display: flex; gap: 12px;
+    padding: 16px 20px;
+    background: rgba(25,134,236,0.04);
+    border-radius: 12px;
+    border: 1px solid rgba(25,134,236,0.08);
+    margin-top: 20px;
+  }
+  .security-tips svg { width: 18px; height: 18px; color: #1986EC; flex-shrink: 0; margin-top: 1px; }
+  .security-tips p { font-size: 12px; color: rgba(0,0,0,0.55); line-height: 18px; }
+
+  /* ===== 密码可见性切换 ===== */
+  .input-wrapper {
+    position: relative;
+  }
+  .input-wrapper .form-input { width: 100%; padding-right: 44px; }
+  .input-wrapper .toggle-pwd {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: rgba(0,0,0,0.26);
+    background: none; border: none;
+  }
+  .input-wrapper .toggle-pwd:hover { color: rgba(0,0,0,0.55); }
+  .input-wrapper .toggle-pwd svg { width: 18px; height: 18px; }
+
+  /* ===== 分隔标签 ===== */
+  .bind-status-divider {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 0;
+  }
+  .bind-status-divider .or {
+    font-size: 12px; color: rgba(0,0,0,0.26);
+    padding: 4px 12px; background: rgba(0,0,0,0.03);
+    border-radius: 12px;
+  }
+  .bind-status-divider::before,
+  .bind-status-divider::after {
+    content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.06);
+  }
+
+  /* ===== 装饰元素 ===== */
+  .decoration-dots {
+    position: absolute; right: 40px; top: 40px;
+    width: 80px; height: 80px; opacity: 0.06;
+    background-image: radial-gradient(circle, #1986EC 1.5px, transparent 1.5px);
+    background-size: 16px 16px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 左侧菜单栏 ===== -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="9" height="9" rx="2" fill="rgba(255,255,255,0.9)"/>
+      <rect x="13" y="2" width="9" height="9" rx="2" fill="rgba(255,255,255,0.6)"/>
+      <rect x="2" y="13" width="9" height="9" rx="2" fill="rgba(255,255,255,0.6)"/>
+      <rect x="13" y="13" width="9" height="9" rx="2" fill="rgba(255,255,255,0.3)"/>
+    </svg>
+    IWOSCENE
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-label">导航</div>
+    <div class="menu-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      工作台
+    </div>
+    <div class="menu-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2.5"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+      设备管理
+    </div>
+    <div class="menu-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      组织管理
+    </div>
+    <div class="menu-label">系统</div>
+    <div class="menu-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      个人中心
+    </div>
+    <div class="menu-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      系统设置
+    </div>
+  </div>
+</div>
+
+<!-- ===== 顶部导航 ===== -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-breadcrumb">系统 / <span>个人中心</span></div>
+  </div>
+  <div class="header-right">
+    <div class="header-icon-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="header-icon-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="header-avatar-wrap">
+      <div class="header-avatar">管</div>
+      <span class="header-user-name">Admin</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 内容区 ===== -->
+<div class="content-area">
+  <div class="page-header">
+    <div class="page-title">个人中心</div>
+    <div class="page-subtitle">管理您的账户信息和安全设置</div>
+  </div>
+
+  <!-- Tab 栏 -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab(0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+      基本设置
+    </div>
+    <div class="tab-item" onclick="switchTab(1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      修改密码
+    </div>
+    <div class="tab-item" onclick="switchTab(2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      微信绑定
+    </div>
+  </div>
+
+  <!-- ========== Tab 1: 基本设置 ========== -->
+  <div class="tab-panel active">
+    <div class="card" style="max-width:720px">
+      <div class="decoration-dots"></div>
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          个人信息
+        </div>
+      </div>
+      <div class="card-desc">管理您的头像和个人基本信息</div>
+      <div class="card-body">
+        <!-- 头像 -->
+        <div class="avatar-upload-area">
+          <div class="avatar-preview">管
+            <div class="avatar-edit-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <div class="avatar-info">
+            <p>支持 JPG、PNG 格式，大小不超过 2MB</p>
+            <span class="btn-text">更换头像</span>
+          </div>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="form-section">
+          <div class="form-section-title">基本信息</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">用户名 <span class="required">*</span></label>
+              <input class="form-input" type="text" value="admin" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">昵称</label>
+              <input class="form-input" type="text" value="管理员" placeholder="请输入昵称" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">手机号</label>
+              <input class="form-input" type="text" value="138****8888" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">邮箱</label>
+              <input class="form-input" type="text" value="admin@iwoscene.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">所属组织</label>
+              <input class="form-input readonly" type="text" value="IWOSCENE科技有限公司" readonly />
+            </div>
+            <div class="form-group">
+              <label class="form-label">角色</label>
+              <input class="form-input readonly" type="text" value="超级管理员" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-secondary">取消</button>
+          <button class="btn btn-primary">保存更改</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Tab 2: 修改密码 ========== -->
+  <div class="tab-panel">
+    <div class="card" style="max-width:600px">
+      <div class="decoration-dots"></div>
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon-circle" style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.05));color:#F59E0B">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          修改密码
+        </div>
+      </div>
+      <div class="card-desc">定期更换密码有助于保护您的账户安全</div>
+      <div class="card-body">
+        <div class="form-grid" style="grid-template-columns:1fr">
+          <div class="form-group">
+            <label class="form-label">当前密码 <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <input class="form-input" type="password" placeholder="请输入当前密码" />
+              <button class="toggle-pwd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">新密码 <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <input class="form-input" type="password" placeholder="至少8位，含大小写字母和数字" />
+              <button class="toggle-pwd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <div class="password-strength">
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <span class="strength-text" style="color:rgba(0,0,0,0.26)">输入密码后显示强度</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">确认新密码 <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <input class="form-input" type="password" placeholder="请再次输入新密码" />
+              <button class="toggle-pwd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-tips">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>密码修改成功后将自动退出登录，请使用新密码重新登录。建议密码长度不少于8位，包含大小写字母、数字和特殊字符。</p>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-secondary">取消</button>
+          <button class="btn btn-primary">确认修改</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Tab 3: 微信绑定（未绑定） ========== -->
+  <div class="tab-panel">
+    <div class="card" style="max-width:520px">
+      <div class="decoration-dots"></div>
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon-circle" style="background:linear-gradient(135deg,rgba(7,193,96,0.1),rgba(7,193,96,0.05));color:#07C160">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM12.797 16.283c-.576 0-1.045-.47-1.045-1.047s.47-1.047 1.045-1.047c.577 0 1.045.47 1.045 1.047s-.468 1.047-1.045 1.047zm3.693 0c-.577 0-1.045-.47-1.045-1.047s.468-1.047 1.045-1.047c.576 0 1.045.47 1.045 1.047s-.47 1.047-1.045 1.047z"/></svg>
+          </div>
+          微信绑定
+        </div>
+      </div>
+      <div class="card-desc">绑定微信账号后，可使用微信扫码快速登录</div>
+      <div class="card-body">
+        <div class="wechat-bind-area">
+          <div class="wechat-icon-large">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/></svg>
+          </div>
+          <div class="wechat-bind-title">扫描二维码绑定微信</div>
+          <div class="wechat-bind-desc">打开微信 → 扫一扫<br>扫描下方二维码完成绑定</div>
+          <div class="wechat-qrcode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></svg>
+          </div>
+          <div class="wechat-qrcode-tip">二维码有效期 5 分钟，过期请刷新</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Tab 4: 微信绑定（已绑定） ========== -->
+  <div class="tab-panel">
+    <div class="card" style="max-width:600px">
+      <div class="decoration-dots"></div>
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon-circle" style="background:linear-gradient(135deg,rgba(7,193,96,0.1),rgba(7,193,96,0.05));color:#07C160">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/></svg>
+          </div>
+          微信绑定
+        </div>
+        <span class="status-badge connected">
+          <span class="dot"></span>
+          已绑定
+        </span>
+      </div>
+      <div class="card-desc">您的微信账号已成功绑定，可使用微信扫码快速登录</div>
+      <div class="card-body">
+        <div class="wechat-bound-area">
+          <div class="wechat-avatar-bound">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/></svg>
+          </div>
+          <div class="wechat-bound-info">
+            <div class="name">张三</div>
+            <div class="account">微信号：zhangsan_wx</div>
+            <div class="bind-time">绑定时间：2025-03-15 14:30:00</div>
+          </div>
+        </div>
+
+        <div class="security-tips" style="background:rgba(7,193,96,0.04);border-color:rgba(7,193,96,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#07C160" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <p>微信绑定后，您可以使用微信扫码方式快速登录系统，无需再次输入账号密码。解绑后将无法使用该方式登录。</p>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-danger btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            解除绑定
+          </button>
+          <button class="btn btn-secondary btn-sm">更换绑定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Tab 切换脚本 ===== -->
+<script>
+function switchTab(index) {
+  document.querySelectorAll('.tab-item').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
+  document.querySelectorAll('.tab-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === index);
+  });
+}
+</script>
+
+</body>
+</html>
