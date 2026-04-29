@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>IWOSCENE 3.0 - 微信绑定</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans SC','Alibaba PuHuiTi',-apple-system,sans-serif; background:#F0F4F8; width:1920px; height:1080px; overflow:hidden; -webkit-font-smoothing:antialiased; }
+  body::before { content:''; position:fixed; top:-50%; left:-50%; width:200%; height:200%; z-index:-1; background:radial-gradient(ellipse at 20% 50%,rgba(25,134,236,.03) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(25,134,236,.04) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(1,184,100,.02) 0%,transparent 50%),#F0F4F8; }
+  .sidebar { position:fixed; left:0; top:0; width:260px; height:1080px; background:#fff; z-index:10; box-shadow:2px 0 20px rgba(0,0,0,.03); }
+  .sidebar-logo { height:64px; display:flex; align-items:center; padding:0 24px; font-size:18px; font-weight:700; background:linear-gradient(135deg,#1986EC,#0D6BC4); color:#fff; letter-spacing:.5px; }
+  .sidebar-logo svg { margin-right:12px; }
+  .sidebar-menu { padding:16px 0; }
+  .menu-label { padding:8px 24px; font-size:11px; color:rgba(0,0,0,.26); text-transform:uppercase; letter-spacing:1px; font-weight:600; }
+  .menu-item { height:44px; display:flex; align-items:center; padding:0 24px; margin:2px 12px; color:rgba(0,0,0,.55); font-size:14px; border-radius:10px; }
+  .menu-item.active { background:linear-gradient(135deg,#1986EC,#1A7DE0); color:#fff; font-weight:500; box-shadow:0 4px 12px rgba(25,134,236,.3); }
+  .menu-item svg { width:18px; height:18px; margin-right:12px; opacity:.7; }
+  .menu-item.active svg { opacity:1; }
+  .header { position:fixed; top:0; left:260px; right:0; height:64px; background:rgba(255,255,255,.85); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:space-between; padding:0 32px; z-index:9; border-bottom:1px solid rgba(0,0,0,.04); }
+  .header-breadcrumb { font-size:13px; color:rgba(0,0,0,.38); }
+  .header-breadcrumb span { color:rgba(0,0,0,.68); font-weight:500; }
+  .header-right { display:flex; align-items:center; gap:20px; }
+  .header-icon-btn { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:rgba(0,0,0,.38); }
+  .header-avatar-wrap { display:flex; align-items:center; gap:10px; padding:4px 12px 4px 4px; border-radius:28px; }
+  .header-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#1986EC,#01B864); display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:600; }
+  .header-user-name { font-size:13px; color:rgba(0,0,0,.68); }
+  .content-area { position:fixed; left:260px; top:64px; right:0; bottom:0; padding:28px 32px; overflow:hidden; }
+  .page-header { margin-bottom:28px; }
+  .page-title { font-size:24px; font-weight:600; color:rgba(0,0,0,.92); margin-bottom:4px; }
+  .page-subtitle { font-size:13px; color:rgba(0,0,0,.38); }
+  .tab-bar { display:flex; gap:4px; margin-bottom:28px; background:#fff; padding:5px; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,.04); width:fit-content; }
+  .tab-item { padding:10px 24px; border-radius:10px; font-size:13px; color:rgba(0,0,0,.44); font-weight:500; display:flex; align-items:center; gap:6px; }
+  .tab-item.active { background:#fff; color:#1986EC; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .tab-item svg { width:16px; height:16px; }
+  .card { background:#fff; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 20px rgba(0,0,0,.02); border:1px solid rgba(0,0,0,.04); overflow:hidden; }
+  .card-header { padding:24px 32px 0; display:flex; align-items:center; justify-content:space-between; }
+  .card-title { font-size:16px; font-weight:600; color:rgba(0,0,0,.88); display:flex; align-items:center; gap:10px; }
+  .icon-circle { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; }
+  .icon-circle svg { width:18px; height:18px; }
+  .card-desc { padding:8px 32px 0; font-size:13px; color:rgba(0,0,0,.38); }
+  .card-body { padding:24px 32px 32px; }
+  .wechat-bind-area { display:flex; flex-direction:column; align-items:center; padding:48px 0 40px; }
+  .wechat-icon-large { width:72px; height:72px; border-radius:20px; background:linear-gradient(135deg,#07C160,#06AD56); display:flex; align-items:center; justify-content:center; margin-bottom:20px; box-shadow:0 8px 24px rgba(7,193,96,.25); }
+  .wechat-icon-large svg { width:36px; height:36px; color:#fff; }
+  .wechat-bind-title { font-size:18px; font-weight:600; color:rgba(0,0,0,.88); margin-bottom:8px; }
+  .wechat-bind-desc { font-size:13px; color:rgba(0,0,0,.38); margin-bottom:28px; text-align:center; line-height:20px; }
+  .wechat-qrcode { width:200px; height:200px; border-radius:16px; background:#F5F7FA; border:2px dashed rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+  .wechat-qrcode svg { width:80px; height:80px; color:rgba(0,0,0,.12); }
+  .wechat-qrcode-tip { font-size:12px; color:rgba(0,0,0,.26); margin-top:12px; }
+  .decoration-dots { position:absolute; right:40px; top:40px; width:80px; height:80px; opacity:.06; background-image:radial-gradient(circle,#1986EC 1.5px,transparent 1.5px); background-size:16px 16px; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="9" height="9" rx="2" fill="rgba(255,255,255,.9)"/><rect x="13" y="2" width="9" height="9" rx="2" fill="rgba(255,255,255,.6)"/><rect x="2" y="13" width="9" height="9" rx="2" fill="rgba(255,255,255,.6)"/><rect x="13" y="13" width="9" height="9" rx="2" fill="rgba(255,255,255,.3)"/></svg>IWOSCENE</div>
+  <div class="sidebar-menu">
+    <div class="menu-label">导航</div>
+    <div class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>工作台</div>
+    <div class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2.5"/><line x1="4" y1="12" x2="20" y2="12"/></svg>设备管理</div>
+    <div class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>组织管理</div>
+    <div class="menu-label">系统</div>
+    <div class="menu-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>个人中心</div>
+    <div class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系统设置</div>
+  </div>
+</div>
+<div class="header">
+  <div class="header-breadcrumb">系统 / <span>个人中心</span></div>
+  <div class="header-right">
+    <div class="header-icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <div class="header-icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+    <div class="header-avatar-wrap"><div class="header-avatar">管</div><span class="header-user-name">Admin</span></div>
+  </div>
+</div>
+<div class="content-area">
+  <div class="page-header"><div class="page-title">个人中心</div><div class="page-subtitle">管理您的账户信息和安全设置</div></div>
+  <div class="tab-bar">
+    <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-4 8"/></svg>基本设置</div>
+    <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>修改密码</div>
+    <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>微信绑定</div>
+  </div>
+  <div class="card" style="max-width:520px;position:relative">
+    <div class="decoration-dots"></div>
+    <div class="card-header"><div class="card-title"><div class="icon-circle" style="background:linear-gradient(135deg,rgba(7,193,96,.1),rgba(7,193,96,.05));color:#07C160"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/></svg></div>微信绑定</div></div>
+    <div class="card-desc">绑定微信账号后，可使用微信扫码快速登录</div>
+    <div class="card-body">
+      <div class="wechat-bind-area">
+        <div class="wechat-icon-large"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/></svg></div>
+        <div class="wechat-bind-title">扫描二维码绑定微信</div>
+        <div class="wechat-bind-desc">打开微信 → 扫一扫<br>扫描下方二维码完成绑定</div>
+        <div class="wechat-qrcode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></svg></div>
+        <div class="wechat-qrcode-tip">二维码有效期 5 分钟，过期请刷新</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
